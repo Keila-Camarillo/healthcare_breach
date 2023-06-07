@@ -26,6 +26,25 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.neighbors import KNeighborsClassifier
 import wrangle as w
 
+# def model_df():
+#     df = w.clean_df()
+    
+#     # Keep columns
+#     df = df[["state", "breach_type", "location", "multi_breached_location", "summer"]]
+    
+#     # create dummies
+#     encoded_df = pd.get_dummies(df['state'], prefix='state')
+
+#     # Concatenate the encoded DataFrame with the original DataFrame
+#     df = pd.concat([df, encoded_df], axis=1)
+
+#     dummy_df = pd.get_dummies(df[["location"]],
+#                             drop_first=True)
+#     df = pd.concat([df, dummy_df], axis=1)
+#     df = df.drop(columns=["state","location"])
+
+#     return df
+
 def model_df():
     df = w.clean_df()
     
@@ -80,13 +99,31 @@ def best_model(x_train, y_train, x_validate, y_validate, x_test, y_test):
 
 
 ####################################### Decision Tree model functions
+def depth_check(x_train, y_train, x_validate, y_validate):
+    scores_all = []
+    for x in range(1,5):
+
+        tree = DecisionTreeClassifier(max_depth=x, random_state=3)
+        tree.fit(x_train, y_train)
+        train_accuracy = tree.score(x_train, y_train)
+
+        #evaluate on validate
+        validate_accuracy = tree.score(x_validate, y_validate)
+
+        scores_all.append([x, round(train_accuracy, 6), round(validate_accuracy, 6)])
+        
+    scores = pd.DataFrame(scores_all, columns=['max_depth','train_accuracy','validate_accuracy'])
+    
+    scores['difference'] = round(scores.train_accuracy - scores.validate_accuracy, 6)
+    return scores
+
 
 def best_tree(x_train, y_train, x_validate, y_validate):
     '''
     This function provides a quick print output of the train and validation scores based on the decision trees, for easy viewing.
     The function takes the following arguments: logit, x_train, y_train, x_validate, y_validate
     '''
-    tree = DecisionTreeClassifier(max_depth=7, random_state=3)
+    tree = DecisionTreeClassifier(max_depth=3, random_state=3)
 
     # model.fit(x, y)
     tree = tree.fit(x_train, y_train)

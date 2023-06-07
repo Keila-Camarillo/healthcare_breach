@@ -14,6 +14,19 @@ def get_season(month):
     else:
         return 'Unknown'
 
+# create seasons 
+def get_season(month):
+    if month in [12, 1, 2]:
+        return 'Winter'
+    elif month in [3, 4, 5]:
+        return 'Spring'
+    elif month in [6, 7, 8]:
+        return 'Summer'
+    elif month in [9, 10, 11]:
+        return 'Autumn'
+    else:
+        return 'Unknown'
+
 def clean_df():
     df = pd.read_csv('breach_report.csv') 
 
@@ -30,12 +43,6 @@ def clean_df():
     # add month columns
     df["month"] = df.breach_submission_date.dt.strftime("%m")
 
-    # add year column
-    df["year"] = df.breach_submission_date.dt.strftime("%Y")
-
-    # add day column
-    df["day"] = df.breach_submission_date.dt.strftime("%A")
-
     # create columns for multiple locations -- encoded 
 
     # Check if commas exist in the 'Column1' and create a new column 'Has_Comma'
@@ -44,23 +51,29 @@ def clean_df():
     # Convert boolean values to 1 or 0
     df['multi_breached_location'] = df['multi_breached_location'].astype(int)
 
-    # change month and year to and int
-    df[["month", "year"]] = df[["month", "year"]].astype("int")
-    
+    # change month to int
+    df[["month"]] = df[["month"]].astype("int")
+
     # add season column
     df['season'] = df['month'].apply(get_season)
 
+    # rename column
+    df["breach"] = df.type_of_breach
+    df["breach_type"] = df.type_of_breach
+    df = df.drop(columns=["type_of_breach", "month"])
+
     # create dummies
-    dummy_df = pd.get_dummies(df[["season", "business_associate_present"]],
-                            drop_first=True)
+    dummy_df = pd.get_dummies(df[["season", "business_associate_present", "breach"]])
+                            # drop_first=True)
     df = pd.concat([df, dummy_df], axis=1)
 
-    # add day number column
-    df["day_number"] = df.breach_submission_date.dt.strftime("%w")
 
     # rename columns
-    df = df.rename(columns={"name_of_covered_entity": "entity_name", "covered_entity_type": "entity_type", "individuals_affected": "number_affected", "breach_submission_date": "date", "type_of_breach": "breach_type", "location_of_breached_information": "location", "season_Spring": "spring", "season_Summer": "summer", "season_Winter": "winter", "business_associate_present_Yes": "business_associate"})
-    
+    df = df.rename(columns={"name_of_covered_entity": "entity_name", "covered_entity_type": "entity_type", "individuals_affected": "number_affected", "breach_submission_date": "date", "location_of_breached_information": "location", "season_Spring": "spring", "season_Summer": "summer", "season_Winter": "winter", "breach_Hacking/IT Incident": "hacking_or_it_incident", "breach_Improper Disposal": "improper_disposal", "breach_Theft": "theft", "breach_Loss": "loss", "breach_Unauthorized Access/Disclosure": "unauthorized_access_or_disclosure", "business_associate_present_Yes": "business_associate"})
+#     df.columns = df.columns.str.lower()
+    # drop entity name
+    df = df.drop(columns=['entity_name'])
+
     # fix nans for state column
     df.state = df.state.fillna('PR')
 
@@ -68,7 +81,6 @@ def clean_df():
 
     # Display the modified DataFrame
     df = pd.DataFrame(df)
-
     return df
 
 def split_data(df, target_variable="breach_type"):
