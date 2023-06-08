@@ -26,26 +26,19 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.neighbors import KNeighborsClassifier
 import wrangle as w
 
-# def model_df():
-#     df = w.clean_df()
-    
-#     # Keep columns
-#     df = df[["state", "breach_type", "location", "multi_breached_location", "summer"]]
-    
-#     # create dummies
-#     encoded_df = pd.get_dummies(df['state'], prefix='state')
-
-#     # Concatenate the encoded DataFrame with the original DataFrame
-#     df = pd.concat([df, encoded_df], axis=1)
-
-#     dummy_df = pd.get_dummies(df[["location"]],
-#                             drop_first=True)
-#     df = pd.concat([df, dummy_df], axis=1)
-#     df = df.drop(columns=["state","location"])
-
-#     return df
-
 def model_df():
+    """
+    Preprocesses the data and creates a DataFrame suitable for modeling.
+
+    Returns:
+    -------
+    df : pandas DataFrame
+        Preprocessed DataFrame containing selected columns and dummy variables.
+
+    Usage:
+    ------
+    df = model_df()
+    """
     df = w.clean_df()
     
     # Keep columns
@@ -88,7 +81,7 @@ def best_model(x_train, y_train, x_validate, y_validate, x_test, y_test):
     This function provides a quick print output of the baseling accuracy train, validation, test scores based on your classifier, for easy viewing.
     The function takes the following arguments: object name (clf), x_train, y_train, x_validate, y_validate, x_test, y_test
     '''
-    rf = RandomForestClassifier(random_state=3, min_samples_leaf=5, max_depth=6)
+    rf = RandomForestClassifier(random_state=3, min_samples_leaf=1, max_depth=10)
     rf = rf.fit(x_train, y_train)
     # model.fit(x, y)
     print(f'''
@@ -100,6 +93,24 @@ def best_model(x_train, y_train, x_validate, y_validate, x_test, y_test):
 
 ####################################### Decision Tree model functions
 def depth_check(x_train, y_train, x_validate, y_validate):
+    """
+    Evaluate decision tree classifiers with varying max_depth values on training and validation data.
+
+    Parameters:
+        x_train (array-like): Training data features.
+        y_train (array-like): Training data target labels.
+        x_validate (array-like): Validation data features.
+        y_validate (array-like): Validation data target labels.
+
+    Returns:
+        pandas.DataFrame: DataFrame containing the max_depth, train_accuracy, validate_accuracy, and difference columns.
+
+    Raises:
+        None
+
+    Example:
+        scores = depth_check(x_train, y_train, x_validate, y_validate)
+    """
     scores_all = []
     for x in range(1,5):
 
@@ -143,7 +154,7 @@ def best_forest(x_train, y_train, x_validate, y_validate):
     This function provides a quick print output of the train and validation scores based on the random forest, for easy viewing.
     The function takes the following arguments: logit, x_train, y_train, x_validate, y_validate
     '''
-    rf = RandomForestClassifier(random_state=3, min_samples_leaf=5, max_depth=6)
+    rf = RandomForestClassifier(random_state=3, min_samples_leaf=1, max_depth=10)
 
     # model.fit(x, y)
     rf = rf.fit(x_train, y_train)
@@ -152,6 +163,31 @@ def best_forest(x_train, y_train, x_validate, y_validate):
     Accuracy of Random Forest on training set: {round(rf.score(x_train, y_train), 2)}
     Accuracy of Random Forest on validation set: {round(rf.score(x_validate, y_validate),2)}
     ''')
+
+def leaf_check(x_train, y_train, x_validate, y_validate):
+    '''
+    This function takes in: x_train, y_train, x_validate, y_validate
+    Which then runs through a range of (1,11)-min_samples_leaf and descending (1,11) for max_depth to help determine the best parameters
+    '''
+    scores_all = []
+
+    for x in range(1,11):
+
+        #make it
+        rf = RandomForestClassifier(random_state=3, min_samples_leaf=x, max_depth=11-x)
+        #fit it
+        rf.fit(x_train, y_train)
+        #transform it
+        train_acc = rf.score(x_train, y_train)
+
+        #evaluate on my validate data
+        val_acc = rf.score(x_validate, y_validate)
+
+        scores_all.append([x, 11-x, round(train_acc, 4), round(val_acc, 4)])
+
+    scores_df = pd.DataFrame(scores_all, columns=['min_samples_leaf','max_depth','train_acc','val_acc'])
+    scores_df['difference'] = round(scores_df.train_acc - scores_df.val_acc, 3)
+    return scores_df
 
 
 #################################### Logistic Regression model functions 
