@@ -5,7 +5,7 @@ Machine Learning Classification Model for Healthcare Breach Types
 
 ## Project Description
 
-The healthcare breach dataset is utilized in this project to find drivers for breach types. The project aims to discover the key factors contributing to breach types in healthcare facilities and develop a machine learning model to classify these facilities based on the probability of a breach type occurrence. Breach types refer to security incidents where unauthorized parties gain access to sensitive or confidential data. By analyzing the drivers of breach types, this project seeks to enhance our understanding of the contributing elements and aims to help reduce healthcare data breaches, in other facilities.  
+The healthcare breach dataset is utilized in this project to find drivers for breach types. The project aims to discover the key factors contributing to breach types in healthcare facilities and develop a machine learning model to classify these facilities based on the probability of a breach type occurrence. Breach types refer to security incidents where unauthorized parties gain access to sensitive or confidential data. By analyzing the drivers of breach types, this project seeks to enhance our understanding of the contributing elements and aims to enable healthcare facilities to take proactive steps toward protecting sensitive patient information.  
 
 ## Project Goal
 
