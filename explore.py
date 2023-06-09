@@ -51,22 +51,17 @@ def cross_function(train, target_variable, feature_variable, alpha=0.05):
 
 def trim_legend(df, column_name, categories):
     """
-    Categorizes a column in a DataFrame based on a list of categories.
+    Trims and categorizes a column in a pandas DataFrame based on provided categories.
 
     Args:
-        df (pandas.DataFrame): The DataFrame containing the column to be categorized.
-        column_name (str): The name of the column to be categorized.
-        categories (list): A list of categories to use for categorization.
+        df (pandas.DataFrame): The DataFrame containing the column to be trimmed and categorized.
+        column_name (str): The name of the column to be trimmed and categorized.
+        categories (list): A list of categories to be used for categorization. Any values not
+            matching the provided categories will be categorized as 'Other'.
 
     Returns:
-        pandas.DataFrame: The modified DataFrame with the categorized column.
+        pandas.DataFrame: The modified DataFrame with the trimmed and categorized column.
 
-    Example:
-        # Define the list of categories
-        category_list = ['Network Server', 'Email', 'Paper/Films', 'Electronic Medical Record', 'Other']
-
-        # Call the function to categorize a column
-        top_5 = categorize_column(train, 'location', category_list)
     """
     categorized_column = df[column_name].apply(lambda x: x.strip() if isinstance(x, str) else x)
     categorized_column = categorized_column.apply(lambda x: x if x in categories else 'Other')
@@ -75,15 +70,25 @@ def trim_legend(df, column_name, categories):
 
 def plot_stacked_bar(df,yaxis,legend,title,xlabel,ylabel,limit=0,legendnames=None,figsize=None, palette="Pastel1"):
     """
-    Plot the top 5 locations of breaches based on the provided DataFrame.
+    Generates a stacked horizontal bar plot based on the given DataFrame and parameters.
 
-    Parameters:
-    
-top_5 (DataFrame): DataFrame containing breach data with categorized location and breach type columns.
+    Args:
+        df (pandas.DataFrame): The DataFrame containing the data to be plotted.
+        legend (str): The column name in the DataFrame representing the legend/category.
+        limit (int): The maximum number of categories to include in the plot. If there are more categories than the limit,
+            the excess categories will be grouped under the "Other" category.
+        yaxis (str): The column name in the DataFrame representing the y-axis values.
+        palette (str or list): The color palette to use for the plot. It can be a named seaborn palette or a list of colors.
+        figsize (tuple): The figure size (width, height) of the plot.
+        legendnames (list or None): Optional. The list of legend/category names to use for labeling the plot legend.
+            If None, the unique values from the 'legend' column will be used.
+        title (str or None): Optional. The title of the plot. If None, no title will be displayed.
+        ylabel (str or None): Optional. The label for the y-axis. If None, no label will be displayed.
+        xlabel (str or None): Optional. The label for the x-axis. If None, no label will be displayed.
 
     Returns:
-    
-None"""
+        None: The plot is displayed using matplotlib.pyplot.show().
+    """
     lvalues = df.loc[:,legend]
     if limit > 0 and limit < len(lvalues.unique()):
         lvcounts = lvalues.value_counts().reset_index()
